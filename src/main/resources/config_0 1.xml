@@ -1,0 +1,726 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<!--=====================================================================================
+DON'T EDIT THIS FILE.
+
+SYSTEM INTEGRATORS CAN EDIT config_1.xml
+SYSTEM ADMINISTRATORS CAN EDIT config_2.xml
+
+DON'T EDIT THIS FILE
+=======================================================================================-->
+<services>
+
+  <service id="morpho.mesa.launcher.core.functions.ShowVirtualKeyboard">
+    <enabled>false</enabled>
+  </service>
+  <service id="morpho.mesa.launcher.core.BrowserPart">
+    <debugPage>true</debugPage>
+    <rhinoDebuggerEnabled>false</rhinoDebuggerEnabled>
+    <digitsType>ARABIC</digitsType><!-- ARABIC or HINDI --> 
+	  <fullScreen>true</fullScreen>
+  </service>
+  <!-- ************************ CONFIGURATION OF GUI LOGIC *********************************************************-->
+
+  <!--Portal logic-->
+  <service id="morpho.mesa.business.portal.logic.PortalLogic">
+    <checkForUpdates refSource="CommonConfiguration" ref="/checkForUpdates" />
+    <!-- Set the interval between 2 checks for updates. The interval is in seconds 
+        1 day = 86400 seconds  -->
+    <updateCheckPeriod>86400</updateCheckPeriod>
+    <forceUpdate>false</forceUpdate>
+    <scriptFile>CONFIG/scripts-logic/portal-logic.js</scriptFile>
+  </service>
+  
+  <service id="morpho.mesa.common.business.logic.ProcedureDispatcherLogic">
+    <scriptFile>CONFIG/scripts-logic/dispatcher-logic.js</scriptFile>
+  </service>
+  
+  <service id="morpho.mesa.business.dossiers.logic.PrintUILogic">
+    <descriptorsDefinitionFile>CONFIG/descriptor/descriptors/print_ui_filter.xml</descriptorsDefinitionFile>
+  </service>
+  
+  <!--Report printing settings-->
+  <service id="morpho.mesa.business.reports.logic.ReportsLogic">
+    <printingDelay>100</printingDelay>
+    <pdfPrinterNameHint>PDF</pdfPrinterNameHint>
+  </service>
+
+  <service id="morpho.mesa.common.business.logic.UserPrefsLogic">
+    <displayUserDefinedTheme>true</displayUserDefinedTheme>
+  </service>
+  
+  <service id="morpho.mesa.business.cardscan.logic.CardScanLogic">
+    <!-- Relative Path (from application path) of .dat config file for QualityCheck
+      
+      Default value : null
+      -->
+    <QCDataFilePath>/dataFiles/qualitycheck/config/QC_StandardQuality_config.dat</QCDataFilePath>
+    <!-- Relative Path (from application path) for QualityCheck library
+      
+      Default value : null
+      -->
+    <QCLibraryFilePath>/nativeLibraries/QualityCheck/lib/QualityCheck.dll</QCLibraryFilePath>
+    <!--If true, it is allowed to skip elementary prints.
+    BE CAREFUL : this mode must be used only for specific cases. Choose true only if you know
+    exactly what it means. Otherwise, keep this false value
+    
+      Default value : false
+    -->
+    <skipMode>false</skipMode>
+  </service>
+  
+  <!-- ************************ CONFIGURATION OF GUI LOGIC IN A PROCEDURE ********************************************-->
+  <!--ID management settings-->
+  <service id="morpho.mesa.business.barcode.logic.CardIDLogic">
+    <stubImageRelativePath>\StubData\StubBarCodeImage.jpg</stubImageRelativePath>
+  </service>  
+    
+  <service id="morpho.mesa.business.fingerprint.logic.FingersLogic">
+    <!--use of threading for images compression, coping, quality/sequence check
+    This value should usually be set to true to let MBOP use all the machine threads
+    But sometimes, especially when capture resolution is 1000 dpi, some memory issues may occur.
+    In such a case, it is recommended to set this parameter to false to reduce memory use, but 
+    then, MBOP processing may be longer.
+    Possible values
+        true : MBOP threading is used
+        false : MBOP threading is not used
+        Default value : true
+    -->
+    <useMBOPThreading>true</useMBOPThreading>    
+    <!--If true, it is allowed to skip elementary prints.
+    
+      Default value : false
+    -->
+    <skipMode>false</skipMode>
+  </service>
+  
+  
+  <!-- ************************CONFIGURATION OF SERVICES******************************************************-->
+
+  <!--Database settings-->
+  <service id="morpho.mesa.services.datastorage.jpa.JPADataStorageMgr">
+    <PersistenceUnit>MesaPersistenceUnit</PersistenceUnit>
+    <!--All these parameters are JPA/Hibernate parameters. They should be found in persistence.xml but
+        since this file is generic, parameters are defined here in this custo file-->
+    <javax.persistence.jdbc.driver>org.h2.Driver</javax.persistence.jdbc.driver>
+    <javax.persistence.jdbc.user>mesaUser</javax.persistence.jdbc.user>
+    <!-- The password tag below must not contain the value of password, it must contain a key mentioned in mesaPasswords.properties file-->
+    <javax.persistence.jdbc.password>critical-mesaStorageDbasePassword</javax.persistence.jdbc.password>
+    <hibernate.hbm2ddl.auto>update</hibernate.hbm2ddl.auto>
+    <hibernate.show_sql>false</hibernate.show_sql>
+    <hibernate.connection.provider_class>org.hibernate.service.jdbc.connections.internal.C3P0ConnectionProvider</hibernate.connection.provider_class>
+
+    <!-- Configuration C3PO Connection Pool with Hibernante -->
+    <hibernate.c3p0.min_size>1</hibernate.c3p0.min_size>
+    <hibernate.c3p0.max_size>15</hibernate.c3p0.max_size>
+    <hibernate.c3p0.timeout>300</hibernate.c3p0.timeout>
+    <hibernate.c3p0.max_statements>50</hibernate.c3p0.max_statements>
+    
+    <!--hibernate.c3p0.idle_test_period>3000</hibernate.c3p0.idle_test_period-->
+    <c3p0.preferredTestQuery>SELECT 1</c3p0.preferredTestQuery>
+    <c3p0.testConnectionOnCheckout>true</c3p0.testConnectionOnCheckout>
+  </service>
+  
+  <!--Database settings-->
+  <service id="morpho.mesaImport.services.importdata.preloadedbase.PreloadedbaseImportMgr">
+    <javax.persistence.jdbc.user>mesaUser</javax.persistence.jdbc.user>
+    <!-- The password tag bellow must not contain the value of password, it must contain a key mentioned in mesaPasswords.properties file-->
+    <javax.persistence.jdbc.password>mesaPreloadedDbasePassword</javax.persistence.jdbc.password>
+    <hibernate.hbm2ddl.auto>update</hibernate.hbm2ddl.auto>
+    <hibernate.show_sql>false</hibernate.show_sql>
+    <hibernate.connection.pool_size>4</hibernate.connection.pool_size>
+  </service>
+
+  <!-- Photo acquisition settings -->
+  <service id="morpho.mesa.services.acquisition.photo.morphopak.PhotoCaptureConfigurationManager">
+    
+    <device.webcam.configuration>
+       <!-- webcam resolutions 
+      Format of the acquired image for webcam. It must be one of the following integer depending of the camera model:
+      - for all cameras :
+      0 : adjust automatically to the highest resolution supported by the camera (The selected resolution may not be in the list below)
+      1 : 320 x 240
+      2 : 640 x 480
+      - for some webcams or other cameras :
+      3 : 800 x 600
+      4 : 960 x 720
+      5 : 1280 x 960
+      6 : 1280 x 1024
+      7 : 1600 x 1200
+      8 : 1920 x 1080
+      9 : 2048 x 1536
+      10: 2560 x 1920
+      11: 2592 x 1944
+      12: 3264 x 2448
+      13: 3840 x 2160
+      14: 4096 x 2160
+      Note : iBall cameras only supports parameter values 0 and 4 -->
+      <resolution>0</resolution>
+    
+      <!-- This parameter indicates the resolution of the displayed live images.
+      Accepted values are the same as for the parameter resolution. 
+      WARNING : This parameter is not supported in Linux platform. The behaviour is always as if captureFromLive is set to 1.-->
+      <resolutionLive>0</resolutionLive>
+      
+      <!-- define if live will be in the resolution of the snapshot 
+      - 0 : live is VGA. Live is smooth but the snapshot delay is high
+      - 1 : live is snapshot resolution. Live is slow but the snapshot is instantaneous ! 
+      - To activate this mode (value = 1), resolutionLive must be equal to resolution (same value). Note : This rule is not valid for 0 (auto) because resolutionLive and resolution may not have the same value.
+      WARNING : This parameter is not supported in Linux platform. The behaviour is always as if captureFromLive is set to 1.-->
+      <captureFromLive>0</captureFromLive>
+      
+      <!-- snapOffset in ms -->
+      <snapOffset>300</snapOffset>
+
+      <!--gain
+        between 0 and 100, or auto
+        default : auto-->
+      <gain>auto</gain>
+    </device.webcam.configuration>
+    
+    <device.canon_eos.configuration>
+      <!-- Flash mode (only supported for Canon EOS 450D and 1000D)
+           It must be one of the following integer:
+              0 : OFF, (The pop up flash must be closed)
+              1 : ON (The pop up flash must be opened)
+              2 : AUTO. (Highly recommended!)
+
+           For more recent models:
+            - OFF : select P mode and close the pop up flash
+            - ON : select P mode and open the pop up flash
+            - AUTO : select portrait mode
+      -->
+      <flashMode>0</flashMode>
+    </device.canon_eos.configuration>
+      
+    <device.monoVirtual.configuration>
+    </device.monoVirtual.configuration>
+    
+     <device.android.configuration>
+      <!-- android camera resolutions 
+      Format of the acquired image.
+      It must be one of the following integer depending
+      of the camera model: (resolutions supported by
+      Samsung Galaxy Camera)
+      0: adjust automatically to the highest resolution
+      supported by the webcam.
+      12 : 4608 x 3456
+      11 : 4608 x 3072
+      10 : 4608 x 2592
+      9 : 3960 x 2640
+      8 : 3648 x 2736
+      7 : 3264 x 2448
+      6 : 2592 x 1944
+      5 : 2304 x 1728
+      4 : 1984 x 1488
+      3 : 1920 x 1080
+      2 : 1024 x 768
+      1 : 960 x 720
+      -->
+      <resolution>5</resolution>
+    </device.android.configuration>
+    <device.ids.configuration>
+      <!-- Format of the acquired image. It must be one of the following integer depending of the camera model:
+      - for all cameras :
+      0 : adjust automatically to the highest resolution supported by the camera.
+      1 : 320 x 240
+      2 : 640 x 480
+      - for some cameras :
+      3 : 800 x 480
+      4 : 960 x 480
+      5 : 1280 x 720
+      6 : 1280 x 960
+      7 : 1600 x 1200
+      8 : 2048 x 1536
+      9 : 2592 x 1944
+      10: 3264 x 2448
+      11: 4128 x 3096
+      12: 4192 x 3104 -->
+      <resolution>0</resolution> 
+      <!--gain for live image
+        between 0 and 100, or auto
+        default : auto-->
+      <gain>auto</gain>
+      <!--gain for captured image
+        between 0 and 100, or off
+        default : off-->
+      <gain_snap>off</gain_snap>
+      <!--Increase gain
+        0 or 1
+        default : 0-->
+      <gain_boost>0</gain_boost>
+      <!--Controls the automatic white balance mode
+        Possible values : off, auto or once
+        off : no automatic white balance
+        auto : automatic white balance mode is activated. White balance correction is adjusted continuously
+        once : the white balance correction factors are computed only once.
+        default : auto-->
+      <whitebalance>auto</whitebalance>
+    </device.ids.configuration>
+    <!--
+      This timeout is in milliseconds
+      Default : 7000
+      It is used when calling internal MPAK closeDevice(), abort() and captureImage(). If one of those methods do not return after this timeout
+      is reached, assuming there is an error (instead of stayed frozen) so that user can do something.
+    -->
+    <blockingAcquisitionCallTimeout>7000</blockingAcquisitionCallTimeout>
+  </service>
+  
+  <service id="morpho.mesa.services.checkenvironment.CheckEnvironmentImpl">
+    <morphoMPCheckLibPath>/nativeLibraries/MPCheck/MPCheckJNI.dll</morphoMPCheckLibPath>
+  </service>
+
+  <service id="morpho.mesa.services.processing.image.morphoimageconvert.ImageProcessing">
+    <morphoImageConvertLibPath>/nativeLibraries/MorphoImageConvert/MorphoImageConvert.dll</morphoImageConvertLibPath>
+    <!-- compression quality from 1 to 100: 100 is the best quality 1 is the worst. -1 means not enabled. Used for JPEG codec. -->
+    <jpgQuality>90</jpgQuality>
+    <!-- Maximum image size (in bytes) of the output compressed buffer. -1 means not enabled. Used for JPEG and JPEG2000 codec. -->
+    <jpgMaxOutputSize>100000</jpgMaxOutputSize>
+    <jp2Ratio1000DPI>7.5</jp2Ratio1000DPI>
+    <!-- TIFF format when converting to TIFF : NONE, ZLIB, FAX_G4, LZW. Used for TIFF codec. -->
+    <tiffFormat>FAX_G4</tiffFormat>
+    <!-- Compression level (between 0 and 9, 6 is the standard value). Used for PNG codec. -->
+    <pngCompression>6</pngCompression>
+    
+    <!-- The minimum compression ratio value is 1.6 and the maximum 8000, usually 12 for 15 real. Used for WSQ codec -->
+    <wsqRatio>12</wsqRatio>
+    <!-- Scanner BLACK calibration value (if unknown, use 0). Used for WSQ codec -->
+    <wsqScannerBlack>0</wsqScannerBlack>
+    <!-- Scanner WHITE calibration value (if unknown, use 255). Used for WSQ codec -->
+    <wsqScannerWhite>255</wsqScannerWhite>
+  </service>
+  
+  <service id="morpho.mesa.services.processing.portrait.PortraitProcessing">
+    <!-- Relative Path (from application path) of .bin data file for portraitProcessing
+      
+      Default value : ""
+      -->
+    <portraitDataBufferFile>/dataFiles/morphopak/config/conf/databin_FACETOOLS.bin</portraitDataBufferFile>
+    <!-- Relative Path (from application path) of .bin config file for portraitProcessing
+      
+      Default value : ""
+      -->
+    <portraitConfigBufferFile>/dataFiles/morphopak/config/conf/FaceTools_Config.bin</portraitConfigBufferFile>
+  </service>
+
+  <service id="morpho.mesa.services.processing.codematch.CodeMatch">    
+    <minimumScore>3000</minimumScore>
+  </service>
+
+
+  <!--MorphoLite implementation of ICodeMatch interface-->
+  <service id="morpho.mesa.services.processing.codematch.internal.Activator">
+    <!-- Global MorphoLite max log level : messages from MorphoLite with lower level won't be seen
+    Possible values : DEBUG, ERROR, INFO, WARNING
+      
+      Default value : WARNING
+      -->
+    <MLiteLogLevel>WARNING</MLiteLogLevel>
+    <!-- Relative Directory Path (from application path) where MorphoLite library (MorphoLite.dll) is    
+      
+      Default value : null
+      -->
+    <MLiteLibraryPath>/nativeLibraries/MorphoLite</MLiteLibraryPath>
+    <!-- Relative Path (from application path) of .dat config file for MorphoLite
+      
+      Default value : null
+      -->
+    <MLiteConfigFingerBlockFile>/dataFiles/morphoLite/config/initBlock_FingerV6.dat</MLiteConfigFingerBlockFile>
+    <MLiteConfigIrisBlockFile>/dataFiles/morphoLite/config/initBlock_Iris3_0_lvl65.dat</MLiteConfigIrisBlockFile>
+    <MLiteConfigFaceBlockFile>/dataFiles/morphoLite/config/initBlock_Face5_4LOW75.dat</MLiteConfigFaceBlockFile>
+  </service>
+  
+
+
+  <service id="morpho.mesa.services.acquisition.edoc.morphoP11.P11EDocManager">
+    <!-- Relative Path (from application path) of directory that contains DLL for SCardEdocP11 component
+        This directory must contain 
+          SCardEDocP11.x64.dll
+          IdealP15.key
+          token.conf
+      
+      Default value : null
+      -->
+    <SCardEDocP11LibraryPath>/nativeLibraries/SCardEDocP11</SCardEDocP11LibraryPath>
+  </service>
+  
+  <service id="morpho.mesa.services.acquisition.photo.morphopak.internal.Activator">
+    <!-- Global MorphoPak max log level : messages from MorphoPak with lower level won't be seen
+    Possible values : CRITICAL, WARNING, INFORMATION, DEBUG
+      Default value : WARNING
+      -->
+    <MPakLogLevel>INFORMATION</MPakLogLevel>
+    <!-- MorphoPak debug Mode Path : Path were MorphoPak will save intermidiate captured images (Mesa will try to create it id it doesn't exists, but the creation may fail, it's preferable to create the path manually. ). 
+    Used only if morphoPakLogLevel value is debug.
+    Mesa has to be stated as admin, otherwise it will crash during acquisition if MPakLogLevel is DEBUG and debugModePath isn't empty -->
+    <debugModePath>d:/MPakDebugModePath</debugModePath>
+  </service> 
+  
+  <service id="morpho.mesa.services.processing.portrait.internal.Activator">
+    <!-- Global FaceTools max log level : messages from FaceTools with lower level won't be seen
+    Possible values : Debug, Info, Warning, Error
+      
+      Default value : Debug
+      -->
+    <faceToolsLogLevel>Debug</faceToolsLogLevel>
+  </service>
+  
+  <service id="morpho.mesa.services.security.permissions.DefaultPermissionsMgr"> 
+  </service>
+
+  <!-- MorphoBop implementation of Fingerprint acquisition service -->
+  <service id="morpho.mesa.services.acquisition.print.mbop.internal.Activator">
+    <!-- Global MorphoBop max log level : messages from MorphoBop with lower level won't be seen
+    Possible values : CRITICAL, WARNING, INFORMATION, DEBUG
+      
+      Default value : CRITICAL
+      -->
+    <MBopCoreLogLevel>CRITICAL</MBopCoreLogLevel>
+    <!-- Relative Directory Path (from application path) where MorphoBop library (morphobop.dll) is    
+      
+      Default value : "/."
+      -->
+    <MBopLibraryPath>/nativeLibraries/MorphoBop</MBopLibraryPath>
+    <!-- Relative Path (from application path) of .dat config file for MorphoBop   
+      
+      Default value : empty string
+      -->
+    <MBopConfigBlockFile>/dataFiles/morphobop/config/MorphoBOP_Config.dat</MBopConfigBlockFile>
+    <!-- Path to script file that must be called for this service -->
+    <scriptFile>CONFIG/scripts-service/mbop_print_acquisition.js</scriptFile>
+  </service>
+  
+
+  <service id="morpho.mesa.services.acquisition.iris.evc.IrisAcquisitionEVCImplementation">
+  
+  	<!-- 
+  		EVC IrisAndFace service url.
+      	Default value : localhost
+    -->
+    <evcServiceUrl>localhost</evcServiceUrl>
+
+    <!-- 
+    	EVC IrisAndFace service port number.
+      	Default value : 8791
+    -->
+    <evcServicePort>8791</evcServicePort>
+    <!-- 
+    	Use secured websocket port to connect to the EVC IrisAndFace service (wss protocol)?
+      	Default value : false
+    -->
+
+    <securedConnection>false</securedConnection>
+    <!-- Security configuration -->
+    <!--
+    <evcKeystoreDetails>
+      <keystorePath>CONFIG/security/evc/mesa-evc.jks</keystorePath>
+      <keystorePassword>evcPhotoKeystorePassword</keystorePassword>
+    </evcKeystoreDetails>
+    -->
+
+	<!--
+		EVC Parameter to enable or not face cropping for a Face capture
+		Default value : false 
+	-->
+	<enableFaceCropping>false</enableFaceCropping>
+	
+	<!--
+		EVC Parameter to calculate or not ICAO on EVC for Face capture
+		Default value : false 
+	-->
+	<enableFaceICAOCheck>false</enableFaceICAOCheck>
+	
+	<!--
+		EVC Parameter to calculate or not Quality criteria on EVC for Iris capture
+		Default value : true 
+	-->
+	<enableIrisQualityCheck>true</enableIrisQualityCheck>
+
+  </service>
+
+  <!-- EVC Supervisor parameters -->
+	<service id="morpho.mesa.services.evc.supervisor.EvcSupervisorServiceImpl">
+    <!-- EVC Supverisor service url.
+      Dafault : localhost
+    -->
+    <url>localhost</url>
+
+    <!-- EVC Supverisor service port number.
+      Dafault : 8741
+    -->
+    <port>8741</port>
+
+    <!-- Use secured websocket port to connect to the EVC Supverisor service (wss protocol)?
+      Default : false
+    -->
+    <secured>false</secured>
+
+	  <!-- Security configuration -->
+    <!--
+    <evcKeystoreDetails>
+      <keystorePath>CONFIG/security/evc/mesa-evc.jks</keystorePath>
+      <keystorePassword>evcPhotoKeystorePassword</keystorePassword>
+    </evcKeystoreDetails>
+    -->
+    <watchedService>irisAndFace</watchedService>
+    <watchedService>photo</watchedService>
+  </service>
+
+  <!-- ************************IMPORT APPLICATION SETTINGS ***************************************************-->
+  
+  <service id="morpho.mesa.business.dataimport.logic.DataImportLogic">
+    <autoMerge>true</autoMerge>
+  </service>
+  
+  <service id="morpho.mesa.common.utils.CSVFileHelper">
+    <fieldsSeparator>\|</fieldsSeparator>
+  </service>
+
+
+  <!-- updater service configuration -->
+  <service id="morpho.mesa.business.portal.update.Updater">
+    <updatesInstallerPath>/tools/updatesInstaller/mesaUpdateInstaller.bat</updatesInstallerPath>
+  </service>
+
+  <!-- ************************CONFIGURATION OF FABRIC FRAMEWORK**********************************************-->
+
+  <service id="com.morpho.mcp.gui.app.e4.Application">
+    <numberOfWindows refSource="CommonConfiguration" ref="/appDetails/numberOfWindows" />
+    <fullScreen refSource="CommonConfiguration" ref="/appDetails/fullScreen" />
+  </service>
+
+  <service id="com.morpho.mcp.gui.workflow.Application">
+    <!--Location of the configuration file for the logging sub-system-->
+    <loggingConfigFile></loggingConfigFile>
+  </service>
+
+  <service id="com.morpho.mcp.gui.utils.L10NHelper">
+    <!-- Workbench localization is not used at all in MESA. Turn off background job. -->
+    <disableWorkbenchLocalizationJob>true</disableWorkbenchLocalizationJob>
+  </service>
+
+  <service id="morpho.mcp.fabric.internal.security.auth.LoginConfiguration">
+  
+    <!-- this is just a testing authentication (authenticates hard-coded list of users) -->
+    <authentication>
+      <name>LocalUsers</name>
+      <loginModule>
+        <class>morpho.mesa.launcher.login.local.LocalLoginModule</class>
+        <flag>required</flag>
+      </loginModule>
+    </authentication>
+    
+    <authentication>
+      <name>NoLogin</name>
+      <loginModule>
+        <class>morpho.mesa.launcher.login.noLogin.NoLoginLoginModule</class>
+        <flag>required</flag>
+      </loginModule>
+    </authentication>
+
+    <!-- authentication is based on current windows logged user -->
+    <authentication>
+      <name>WindowsAuto</name>
+      <loginModule>
+        <class>morpho.mcp.security.authentication.modules.WinDesktopLoginModule</class>
+        <flag>required</flag>
+      </loginModule>
+      <loginModule>
+        <class>morpho.mesa.launcher.login.core.PrincipalMapper</class>
+        <flag>required</flag>
+      </loginModule>
+    </authentication>
+
+
+    <!-- User must log in. Authentication is based windows accounts -->
+    <authentication>
+      <!-- this is regular Windows authentication (using native windows login) -->
+      <name>WindowsManual</name>
+      <loginModule>
+        <class>waffle.jaas.WindowsLoginModule</class>
+        <flag>required</flag>
+        <moduleOption>
+          <name>allowGuestLogin</name>
+          <value>false</value>
+        </moduleOption>
+        <moduleOption>
+          <name>debug</name>
+          <value>true</value>
+        </moduleOption>
+      </loginModule>
+      <loginModule>
+        <class>morpho.mesa.launcher.login.core.PrincipalMapper</class>
+        <flag>required</flag>
+      </loginModule>
+    </authentication>
+      
+  </service>
+           
+  <service id="morpho.mcp.fabric.internal.security.auth.DefaultSecureLoginContext">
+    <!-- which named configuration to use (one from the list of login configurations) -->
+    <activeConfiguration refSource="morpho.mesa.security.authentication" ref="/active" />
+    <!-- OSGi filter for the active login callback handler ID ('MESA-Login' is the MESA Login screen) -->
+    <activeCallbackHandler>(ID=MESA-Login)</activeCallbackHandler>
+  </service>  
+  
+  <service id="morpho.mesa.services.security.cryptAndSign.mcpcompsec.MesaMCPCertificatesManager">
+    <!--
+    Full path of file in which MCP XML configuration should be dumped (for test, debug purpose)
+    Default : no value (no dump)
+    <MCPConfDumpPath>C:/Bienvenue/MCPPKCS7ConfDump.xml</MCPConfDumpPath>
+    --> 
+  </service>
+  <service id="morpho.mesa.services.security.cryptAndSign.mcpcompsec.MesaMCPCryptoManager/MESA-USB-1">
+    <!--
+    Full path of file in which MCP XML configuration should be dumped (for test, debug purpose)
+    Default : no value (no dump)
+    <MCPConfDumpPath>C:/Bienvenue/MCPPKCS7ConfDump_USB1.xml</MCPConfDumpPath>
+    -->
+  </service>
+
+  <service id="com.morpho.mcp.gui.app.SplashShell">
+    <!-- Application Name -->
+    <appName refSource="CommonConfiguration" ref="/appDetails/appName"/>
+    <!-- Application version -->
+    <version refSource="CommonConfiguration" ref="/appDetails/version"/>
+    <!-- Indicates if the Remember Me check box on the log in screen should be set enabled [true|false] -->
+    <enableRememberLogin>true</enableRememberLogin>
+  </service>
+
+  <service id="com.morpho.mcp.gui.app.ApplicationWorkbenchWindowAdvisor">
+    <appTitle refSource="CommonConfiguration" ref="/appDetails/appName"/>
+    <isStandAlone>false</isStandAlone>
+  </service>
+
+  <!--Workflow manager settings-->
+  <service id="com.morpho.mcp.gui.workflow.jbpm.WorkflowManagerConfig">
+    <!-- use jBPM workflow persistence (details defined below) -->
+    <supportPersistence>false</supportPersistence>
+
+    <!-- deploy XML workflows (from the file system) to the persistence on every application startup 
+         if 'false', deploy only if no workflows has been deployed (database is empty)  -->
+    <forceDeployDefinitionsOnStartup>true</forceDeployDefinitionsOnStartup>
+
+    <!-- how to handle process variable persistence -->
+    <variablePersistLocation>C:/MesaStorage/variables</variablePersistLocation>
+    <!--processVariableAdapterFactory>morpho.mesa.services.storage.jpa.ProcessVariableAdapterFactory</processVariableAdapterFactory-->
+
+    <!--Driver-->
+    <!--URL of database connection-->
+    <!-- SQL dialect -->
+    <!-- dbusername -->
+    <!-- password -->
+    <databaseDriver>org.h2.Driver</databaseDriver>
+    <databaseConnectionURL>jdbc:h2:file:c:/MesaStorage/MESA.jbpm</databaseConnectionURL>
+    <databaseDialect>org.hibernate.dialect.H2Dialect</databaseDialect>
+    <userName>jbpmUser</userName>    
+    <password/>
+
+    <!--defaultConnectionURL>jdbc:h2:tcp://localhost/C:/MesaStorage/MESA</defaultConnectionURL>    
+    <defaultUserName>jbpmUser</defaultUserName>    
+    <defaultPassword></defaultPassword-->
+  </service>
+
+  <!--Configures the available languages in the resource manager as well as their flags-->
+  <service id="com.morpho.mcp.gui.workflow.ResourceManager.Configuration">
+    <!--Default language-->
+    <defaultLang>en</defaultLang>
+    <!--language definition-->
+    <language>
+      <name>en</name>
+      <label>English</label>
+      <image>CONFIG/gfx/small_flag_of_united_kingdom.gif</image>
+    </language>
+    <language>
+      <name>fr</name>
+      <label>Français </label>
+      <image>CONFIG/gfx/small_flag_of_france.gif</image>
+    </language>
+  </service>
+  <service id="CommonConfiguration">
+          <reviewer>
+              <host>127.0.0.1</host>
+              <port>9099</port>
+              <sslEnabled>false</sslEnabled>
+          </reviewer>
+  </service>
+  <service id="com.morpho.mcp.gui.server.Settings">
+    <host ref="/reviewer/host" refSource="CommonConfiguration"/>
+    <port ref="/reviewer/port" refSource="CommonConfiguration"/>
+    <!-- HTTPS/SSL configuration part -->
+    <sslEnabled ref="/reviewer/sslEnabled" refSource="CommonConfiguration"/>
+    <sslKeyStoreFile>CONFIG/security/admin.jks</sslKeyStoreFile>
+    <sslKeyStorePassword>changeit</sslKeyStorePassword>
+    <sslKeyPassword>changeit</sslKeyPassword>
+    <sslTrustStoreFile>CONFIG/security/truststore</sslTrustStoreFile>
+    <sslTrustStorePassword>changeit</sslTrustStorePassword>
+    <!-- end of HTTPS/SSL configuration part -->
+    <staticContentLocation>CONFIG/../web</staticContentLocation>
+    <remoteApiEnabled>true</remoteApiEnabled>
+    <servletPath>/MESA/api</servletPath>
+    <webSocketMaxIdleSeconds>604800</webSocketMaxIdleSeconds><!-- 7 days, that is to say .. never close an opened websocket.-->
+    <webSocketMaxTextSize>8388608</webSocketMaxTextSize>
+    <webSocketMaxBinarySize>8388608</webSocketMaxBinarySize>
+    <numberOfInstances refSource="CommonConfiguration" ref="/appDetails/numberOfWindows" />
+    <webSocketMaxClients>1</webSocketMaxClients>
+  </service>
+  
+  <service id="morpho.mesa.services.acquisition.signature.topaz.SignatureServiceSDKImpl">
+	 <!-- Possible values: --> 
+	<!--SignatureGemLCD1X5, SignatureGem1X5, SignatureGem4X5, SignatureGemLCD4X3New, SignatureGemLCD4X5, ClipGem, ClipGemLGL, SigGemColor57, SigLiteColor43--> 
+	<!-- Default value: SignatureGem1X5  --> 
+	<!-- NOTE: Check custo guide to know which value to choose according to the device model /!\ If you put a value not in the list, signature capture will not work as expected -->
+    <signatureDevice>SignatureGem1X5</signatureDevice>
+    <!-- Possible values:  --> 
+	<!--
+	    - For Topaz USB-connected ("-HSB") pads, use:  "HID1"
+	    - For Topaz 9-pin serial pads (under Windows) use: "COMX" (where X is the port in question, for instance: COM1)
+	    - For Linux and 9-pin serial pads, for instance: "/dev/ttyS0"
+	--> 
+	<!-- Default value: HID1  --> 
+    <tabletComPort>HID1</tabletComPort>
+    <tabletLogicalXSize>776</tabletLogicalXSize>
+    <tabletLogicalYSize>240</tabletLogicalYSize>
+  </service> 
+   
+  <service id='com.printrak.frontend.services.card_acquisition_toolkit.logic.ConfigurationLogic'>
+    <!--This list corresponds to exception values from morpho.mesa.datamodel.biometrics.PhysicalFingerData.ExceptionType
+    that lead to "no segmentation" (because missing). Customizer should NEVER change this list. Only developers are allowed to change it-->
+    <exemptionSkipProcessingList>
+      <exemptionCode>AMPUTATED</exemptionCode>
+      <exemptionCode>BANDAGED</exemptionCode>
+      <exemptionCode>MISSING</exemptionCode>
+    </exemptionSkipProcessingList>
+  </service>
+  
+ <!-- ************************************* MbopAcquisition Service *********************************************** -->
+ <!-- This configuration deals with fingerprints acquisition service -->
+
+  <service id="morpho.mesa.services.acquisition.print.mbop.MbopAcquisition">
+  <!-- -In case of several fingerprint devices connected to the workstation, the MESA Customizer can configure which fingerprint devices will be ignored  
+    Examples  : 
+    
+    <deviceToIgnore>MSO.MSO_1350_E2.1316S017573</deviceToIgnore> the device name contains (MSO.MSO_1350_E2.1316S017573)
+    <deviceToIgnore>MSO</deviceToIgnore>  the device name contains (MSO)
+    <deviceToIgnore>^MSO</deviceToIgnore>  the device name is started with (MSO)
+    <deviceToIgnore>MSO$</deviceToIgnore>  the device name is finished with (MSO)
+    <deviceToIgnore>^MSO$</deviceToIgnore> the device name is exactly  (MSO)
+   -->
+
+      <!--Fake Finger Detection level be changed here if supported by the device of course. value NONE means that the feature FFD is to be disabled.
+    Default value is LOW.
+    Suuprted values are :
+                         NONE,
+                         EXTRA_LOW,
+	                       VERY_LOW,
+	                       LOW,
+	                       MEDIUM,
+	                       HIGH,
+	                       VERY_HIGH,
+	                       EXTRA_HIGH
+    -->
+    <ffdLevel>LOW</ffdLevel>
+
+  </service>
+  
+
+</services>
